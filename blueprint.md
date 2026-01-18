@@ -1,47 +1,56 @@
-# Minesweeper Game Blueprint
+# Minesweeper Game Enhancement Blueprint
 
-## 1. Overview
+## 1. Project Overview
 
-A modern, web-based Minesweeper game built with HTML, CSS, and vanilla JavaScript. The game offers a classic Minesweeper experience with several enhancements, including a customizable mine count, a computer-assisted hint system, and a clean, responsive, and performant user interface designed for both desktop and mobile. The entire application is contained within a single `index.html` file.
+This document outlines the plan to enhance a web-based Minesweeper game. The goal is to add features that improve user experience and replayability, specifically by introducing difficulty levels, a game timer, and a player assistance mechanism.
 
-## 2. Project Outline & Features
+## 2. Implemented Features and Design
 
-This section documents the design, style, and features of the application from the initial version to the current one.
+### **Current Version**
+*   **Core Gameplay:** A functional Minesweeper game with three difficulty levels (Easy, Medium, Hard).
+*   **Dynamic Layout:** The game grid automatically adjusts its size based on the selected difficulty using CSS variables.
+*   **Game Timer:** A timer starts on the first click and stops when the game ends.
+*   **Controls:**
+    *   UI buttons to switch between "Dig" and "Flag" modes for mobile-friendly play.
+    *   Click to perform the selected action (dig or flag).
+    *   Right-click always flags a cell on desktop.
 
-### 2.1. Initial Version (Core Game)
-*   **Framework:** None. Built with plain HTML, CSS, and JavaScript.
-*   **Structure:** A single `index.html` file.
-*   **Game Board:** A 20x20 grid.
-*   **Core Logic:** Left-click to reveal, right-click to flag, win/loss conditions, and chain reaction for empty cells.
-*   **Customization:** Input field for mine count.
+### **Re-implementing the Green Light Bonus**
 
-### 2.2. Visual & Layout Upgrade (Flexbox Centering)
-*   **Layout:** The main game container is centered using CSS Flexbox.
-*   **Styling:** Added backgrounds, rounded corners, box-shadows, and colored numbers for revealed cells to enhance visual hierarchy and readability.
+*   **Green Light Bonus:** A system to reward correct flagging.
+    *   When a player correctly flags a mine, a green light turns on.
+    *   After collecting 3 correct flags, the game automatically marks one un-flagged mine with a special pin (📍).
+    *   The lights reset after the bonus is awarded.
+*   **Game Instructions:** A clear explanation of the game rules, controls, and the bonus feature is displayed on the page.
 
-### 2.3. "The 5-Light Indicator" Feature (Computer Assistance)
-*   **UI Element:** A visual "energy slot" with 5 lights.
-*   **Logic:** Correctly flagging 5 mines rewards the player by having the computer automatically mark one un-flagged mine. The lights reset after the reward.
+## 3. Current Enhancement Plan: Re-add Green Light Feature
 
-### 2.4. Icon & Style Differentiation
-*   **Objective:** To create clear visual distinctions between game actions.
-*   **Iconography:** Player Flag (`🚩`), Computer-Assisted Flag (`📍`), Revealed Mine (`💣`), Incorrectly Flagged Mine (`❌`).
+This plan details the steps to re-integrate the green light bonus system and add game instructions.
 
-### 2.5. Mobile & Responsive Optimization
-*   **Objective:** To make the game fully functional and enjoyable on mobile devices.
-*   **Toggle Mode:** Added "Dig" (`⛏️`) and "Flag" (`🚩`) buttons for single-tap operation on touchscreens.
-*   **Responsive Layout:** Implemented horizontal scrolling for the grid on small screens and made controls larger and easier to tap.
-*   **Interaction Polish:** Added CSS to prevent pull-to-refresh and accidental text selection on mobile.
+### **Step 1: UI Enhancements**
 
-### 2.6. Performance & Rendering Optimization (Current Version)
-*   **Objective:** To eliminate layout shifts, reduce rendering lag, and create a smoother user experience.
-*   **Layout Stability:**
-    *   CSS `overflow-y: scroll;` was applied to the `body` to permanently reserve space for the scrollbar, preventing the entire layout from shifting when the content height changes.
-    *   CSS `overscroll-behavior-y: contain;` was also added to prevent the pull-to-refresh action on mobile browsers.
-*   **Efficient DOM Updates:**
-    *   The core rendering logic was refactored. The `initGame()` function now creates the 400 grid cell DOM elements only once.
-    *   The `renderGrid()` function was optimized to no longer clear and rebuild the entire grid on every click. Instead, it now intelligently iterates through the existing cell elements and only updates their CSS classes and `innerHTML` to reflect the current game state. This dramatically reduces the amount of DOM manipulation, resulting in a significantly faster and flicker-free rendering process.
+*   **HTML Structure:**
+    *   Add a `<div>` with the ID `#energy-slot` to contain three individual `<div>` elements, each representing a light.
+    *   Add a `<div>` with the ID `#computer-assistant` to display messages when the bonus is triggered.
+    *   Add a `<div>` with the ID `#instructions` to hold the game rules.
+*   **CSS Styling:**
+    *   Add styles for the `#energy-slot` and the `.light` elements, including an `.on` state for when a light is active.
+    *   Style the `#computer-assistant` and `#instructions` sections for readability.
 
-## 3. Current Implementation Plan
+### **Step 2: JavaScript Logic for Green Light Bonus**
 
-The last user request was to optimize performance and rendering. This has been completed. The current state of the application reflects all the features listed in this blueprint. No further implementation is planned until the next user request.
+*   **State Management:**
+    *   Introduce a `correctFlagsForBonus` variable to track the number of correct flags placed.
+    *   Add an `isComputerFlagged` property to each cell object in the `grid` data structure.
+*   **Game Flow Integration:**
+    *   In `initGame()`: Reset `correctFlagsForBonus` and clear any bonus-related messages.
+    *   In `handleCellRightClick()` (or the flagging logic):
+        *   When a flag is placed on a mine, increment `correctFlagsForBonus` and update the lights.
+        *   If `correctFlagsForBonus` reaches 3, trigger the `computerRevealMine()` function, reset the counter, and update the lights.
+        *   When a correct flag is removed, decrement the counter.
+*   **Bonus Functions:**
+    *   `updateLights()`: Visually syncs the number of lit lights with the `correctFlagsForBonus` counter.
+    *   `computerRevealMine()`: Finds an un-flagged mine, marks it as `isComputerFlagged`, and displays a message.
+*   **Rendering:**
+    *   Update `renderGrid()` to display a different icon (📍) for mines flagged by the computer.
+    *   Update `handleCellClick()` to prevent digging on computer-flagged cells.
